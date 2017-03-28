@@ -51,7 +51,7 @@ function parseArray(props) {
 
   while (/\s/.test(s[i - 1])) i -= 1; // Trim end
 
-  if (array.length) {
+  if (anchor < i) {
     array.push({
       start : anchor,
       end : i,
