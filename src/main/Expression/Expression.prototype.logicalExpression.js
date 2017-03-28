@@ -1,0 +1,3 @@
+Token.prototype.logicalExpression = function () {
+
+};

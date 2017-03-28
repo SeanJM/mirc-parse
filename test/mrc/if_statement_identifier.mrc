@@ -1,0 +1,3 @@
+if (%cat) {
+  echo cat
+}

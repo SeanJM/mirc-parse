@@ -1,0 +1,11 @@
+{
+  "externals": [ "node_modules/lasso-string/src/string/between.js" ],
+  "src" : "src/",
+  "dest" : "",
+  "isBundle": true,
+  "isProduction": false,
+  "sourceMap": true,
+  "isSite": false,
+  "useClosure": true,
+  "bundle": "mirc-parse.js"
+}

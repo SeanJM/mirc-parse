@@ -1,0 +1,21 @@
+{
+  "name": "mirc-parse",
+  "version": "1.0.5",
+  "license": "MIT",
+  "author": "Sean MacIsaac <seanjmacisaac@gmail.com> (http://twitter.com/seanjmacisaac)",
+  "main": "mirc-parse.js",
+  "scripts": {
+    "test": "test/index.js"
+  },
+  "dependencies": {
+    "eslint": "latest",
+    "grunt": "latest",
+    "grunt-contrib-concat": "latest",
+    "grunt-contrib-copy": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-watch": "latest",
+    "lasso-string": "^5.2.0",
+    "lodash": "latest",
+    "match-file-utility": "latest"
+  }
+}

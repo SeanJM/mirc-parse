@@ -1,0 +1,1 @@
+$iif(%cat == 2, yes, no)

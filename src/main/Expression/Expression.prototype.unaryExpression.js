@@ -1,0 +1,3 @@
+Token.prototype.unaryExpression = function () {
+
+};
