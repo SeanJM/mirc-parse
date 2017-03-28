@@ -87,7 +87,7 @@
     var props = {
       type : 'callExpression',
       callee : false,
-      arguments : false,
+      arguments : [],
       property : false,
       optional : false,
       required : false,
