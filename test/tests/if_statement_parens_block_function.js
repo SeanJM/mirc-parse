@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  name : 'If statement',
+  name : 'If Statement (parents, block and function)',
   this : function () {
-    const str = fs.readFileSync(path.resolve('test/mrc/if_statement_identifier.mrc'), 'utf8');
+    const str = fs.readFileSync(path.resolve('test/mrc/if_statement_parens_block_function.mrc'), 'utf8');
     const parser = new ParseMirc(str);
     const result = parser.parse(str);
     return result;
@@ -21,17 +21,10 @@ module.exports = {
           "start": 0,
           "end": 25,
           "test": {
-            "type": "binaryExpression",
+            "type": "identifier",
             "start": 4,
-            "end": 9,
-            "left": {
-              "start": 4,
-              "end": 8,
-              "type": "identifier",
-              "name": "%cat"
-            },
-            "operator": false,
-            "right": false
+            "name": "%cat",
+            "end": 8
           },
           "consequent": {
             "type": "blockStatement",
@@ -39,12 +32,12 @@ module.exports = {
             "end": 25,
             "body": [
               {
-                "type": "expressionStatement",
+                "type": "functionStatement",
                 "start": 15,
                 "end": 25,
                 "expression": {
-                  "start": 15,
-                  "calle": {
+                  "type": "callExpression",
+                  "callee": {
                     "type": "identifier",
                     "start": 15,
                     "name": "echo",
@@ -52,12 +45,18 @@ module.exports = {
                   },
                   "arguments": [
                     {
+                      "type": "literal",
+                      "value": "cat",
+                      "raw": "'cat'",
                       "start": 20,
-                      "end": 23,
-                      "type": "stringLiteral",
-                      "value": "cat"
+                      "end": 23
                     }
-                  ]
+                  ],
+                  "property": false,
+                  "optional": false,
+                  "required": false,
+                  "start": 0,
+                  "end": 23
                 }
               }
             ]
