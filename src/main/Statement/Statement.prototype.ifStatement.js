@@ -12,6 +12,7 @@
     var s = this.string;
     var i = this.start;
     var n = this.end;
+
     var type = 'ifStatement';
 
     var props = {
@@ -23,14 +24,21 @@
       alternate : false
     };
 
-    if (/^if(\s+|)\(/.test(s)) {
+    i += 2;
+    if (/^(\s+|)\(/.test(s.substring(i, n))) {
       props.test = parseTestParens.call(this);
       i = props.test.end + 1;
     } else {
+      while (i < n && /\s/.test(s[i])) i += 1;
+      props.test = new Expression({
+        start : i,
+        end : n,
+        string : s
+      });
       i = props.test.end;
     }
 
-    while (/\s/.test(s[i])) i += 1;
+    while (i < n && /\s/.test(s[i])) i += 1;
 
     props.consequent = new Statement({
       string : s,
