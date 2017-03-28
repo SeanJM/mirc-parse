@@ -33,6 +33,10 @@ function parseArray(props) {
       }
     }
 
+    if (CONTROL_CODE[s[i]] === 'color') {
+      while (i < n && !/\s/.test(s[i])) i += 1;
+    }
+
     if (delimiter_exp.test(s[i])) {
       array.push({
         start : anchor,
