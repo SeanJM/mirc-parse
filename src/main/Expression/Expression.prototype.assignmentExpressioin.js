@@ -1,3 +1,0 @@
-Token.prototype.assignmentExpression = function () {
-
-};

@@ -1,8 +1,14 @@
 Statement.prototype.assignmentStatement = function () {
+  let type = 'assignmentStatement';
   return {
-    type : 'assignmentStatement',
-    start : this.body.start,
-    end : this.body.end,
-    declarations : []
+    type : type,
+    start : this.start,
+    end : this.end,
+    expression : new Expression({
+      context : type,
+      start : this.start,
+      end : this.end,
+      string : this.string
+    })
   };
 };
