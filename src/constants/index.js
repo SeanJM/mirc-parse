@@ -1,5 +1,6 @@
 var EXP_ALIAS = /[a-zA-Z0-9_\-]+/;
 var EXP_VAR = /%[a-zA-Z0-9_\-\:\.\_]+/;
+var EXP_IDENTIFIER = /\$[a-zA-Z0-9_\-\:\_]+/;
 
 var COMPARISON_OPERATORS = [
   '==',         // equal to
@@ -75,3 +76,11 @@ var LOGICAL_OPERATORS = [
   '&&',
   '||'
 ];
+
+var CONTROL_CODE = {};
+CONTROL_CODE[String.fromCharCode(3)] = 'color';
+CONTROL_CODE[String.fromCharCode(2)] = 'bold';
+CONTROL_CODE[String.fromCharCode(29)] = 'italics';
+CONTROL_CODE[String.fromCharCode(31)] = 'underline';
+CONTROL_CODE[String.fromCharCode(16)] = 'swap';
+CONTROL_CODE[String.fromCharCode(15)] = 'clear';
