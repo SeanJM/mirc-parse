@@ -1,30 +1,45 @@
-Statement.prototype.ifStatement = function (opt) {
-  var s = opt.string;
-  var i = opt.start;
-
-  var props = {
-    type : 'ifStatement',
-    start : i,
-    end : 0,
-    test : {},
-    consequent : false,
-    alternate : false
-  };
-
-  if (/^if(\s+|)\(/.test(s)) {
-    props.test = new ParseMirc({
-      string : s,
-      start : i
-    }).parseConditional();
+(function () {
+  function parseTestParens() {
+    var b = between('(', ')', this.string.substring(this.start, this.end));
+    return new Expression({
+      start : this.start + b.start + 1,
+      end : this.start + b.end,
+      string : this.string
+    });
   }
 
-  i = props.test.end;
-  props.consequent = new ParseMirc({
-    string : s,
-    start : i
-  }).parseBlock();
-  props.end = props.consequent.end;
+  Statement.prototype.ifStatement = function () {
+    var s = this.string;
+    var i = this.start;
+    var n = this.end;
+    var type = 'ifStatement';
 
-  // Capture name
-  return props;
-};
+    var props = {
+      type : type,
+      start : i,
+      end : 0,
+      test : false,
+      consequent : false,
+      alternate : false
+    };
+
+    if (/^if(\s+|)\(/.test(s)) {
+      props.test = parseTestParens.call(this);
+      i = props.test.end + 1;
+    } else {
+      i = props.test.end;
+    }
+
+    while (/\s/.test(s[i])) i += 1;
+
+    props.consequent = new Statement({
+      string : s,
+      start : i,
+      end : n
+    });
+    props.end = props.consequent.end;
+
+    // Capture name
+    return props;
+  };
+}());
