@@ -1,3 +1,11 @@
+/*
+  opt : {
+    start : Number,
+    end : Number,
+    string : String
+  }
+*/
+
 function Expression(opt) {
   let p = new Predicate(opt);
   Object.assign(this, opt);
