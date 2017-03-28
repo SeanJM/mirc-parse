@@ -8,7 +8,6 @@ module.exports = {
     const str = fs.readFileSync(path.resolve('test/mrc/variable_functionStatement.mrc'), 'utf8');
     const parser = new ParseMirc(str);
     const result = parser.parse(str);
-    console.log(JSON.stringify(result, null, '  '));
     return result;
   },
   isDeepEqual : function () {
