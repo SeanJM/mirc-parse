@@ -1,19 +1,20 @@
 Expression.prototype.identifierExpression = function () {
-  let s = this.string;
-  let i = this.start;
+  var s = this.string;
+  var i = this.start;
+  var n = this.end;
 
-  let props = {
+  var props = {
     type : 'identifier',
     start : i,
     name : ''
   };
 
-  let isMircIdentifier = s[i] === '$';
-  let regExp = isMircIdentifier
+  var isMircIdentifier = s[i] === '$';
+  var regExp = isMircIdentifier
     ? /\(|\s|\|/
     : /\s/;
 
-  while (s[i] && !regExp.test(s[i])) {
+  while (i < n && !regExp.test(s[i])) {
     props.name += s[i];
     i += 1;
   }
