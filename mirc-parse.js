@@ -541,7 +541,7 @@ function Predicate(opt) {
 }
 Predicate.prototype.isAssignmentExpression = function () {
   var slice = this.string.substring(this.start, this.end);
-  return new RegExp(EXP_VAR + '(\s+|)=').test(slice);
+  return new RegExp(EXP_VAR.source + '(\\s+|)=').test(slice);
 };
 /*
   - (A) === (B)
@@ -755,31 +755,37 @@ function Statement(opt) {
   Object.assign(this, opt);
 
   if (/^(\/|)var\b/.test(slice)) {
-    return this['variableDeclaration']();
+    return this.variableDeclaration();
   } else if (/^%[a-zA-Z\-\_0-9]+(\s+)=/.test(slice)) {
-    return this['assignmentStatement']();
+    return this.assignmentStatement();
   } else if (/^(\/|)alias\b/.test(slice)) {
-    return this['functionDeclaration']();
+    return this.functionDeclaration();
   } else if (/^(\/|)[a-zA-Z0-9\-\_]+/.test(slice)) {
-    return this['functionStatement']();
+    return this.functionStatement();
   } else if (/^\$[a-zA-Z0-9\-\_]+/.test(slice)) {
-    return this['functionStatement']();
+    return this.functionStatement();
   } else if (/^\%[\:\.a-zA-Z0-9\-\_]+/.test(slice)) {
-    return this['functionStatement']();
+    return this.functionStatement();
   } else if (/^(\/|)return\b/.test(slice)) {
-    return this['returnStatement']();
+    return this.returnStatement();
   } else if (/^(\/|)halt\b/.test(slice)) {
-    return this['haltStatement']();
+    return this.haltStatement();
   } else if (/^if\b/.test(slice)) {
-    return this['ifStatement']();
+    return this.ifStatement();
   }
 }
 Statement.prototype.assignmentStatement = function () {
+  let type = 'assignmentStatement';
   return {
-    type : 'assignmentStatement',
-    start : this.body.start,
-    end : this.body.end,
-    declarations : []
+    type : type,
+    start : this.start,
+    end : this.end,
+    expression : new Expression({
+      context : type,
+      start : this.start,
+      end : this.end,
+      string : this.string
+    })
   };
 };
 Statement.prototype.block = function () {
