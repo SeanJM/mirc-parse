@@ -1,3 +1,3 @@
-Token.prototype.unaryExpression = function () {
+Expression.prototype.unaryExpression = function () {
 
 };

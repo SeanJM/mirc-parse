@@ -1,3 +1,3 @@
-Token.prototype.logicalExpression = function () {
+Expression.prototype.logicalExpression = function () {
 
 };
