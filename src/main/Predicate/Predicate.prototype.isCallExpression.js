@@ -1,5 +1,6 @@
 Predicate.prototype.isCallExpression = function () {
-   if (this.context === 'functionStatement') {
+  let slice = this.string.substring(this.start, this.end);
+   if (slice[0] === '$' || this.context === 'functionStatement') {
     return true;
   }
 };
