@@ -8,7 +8,9 @@
 
 function Expression(opt) {
   let p = new Predicate(opt);
+
   Object.assign(this, opt);
+  this.type = false;
 
   if (p.isAssignmentExpression()) {
     return this.assignmentExpression();
