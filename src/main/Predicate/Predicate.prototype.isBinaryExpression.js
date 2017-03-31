@@ -11,8 +11,6 @@ Predicate.prototype.isBinaryExpression = function () {
     delimiter : ' '
   });
 
-  console.log(parts.value.length, parts.value[1].slice);
-
   return (
     parts.value.length > 2
     && BINARY_OPERATORS.includes(parts.value[1].slice)
