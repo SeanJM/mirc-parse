@@ -1,7 +1,10 @@
 var EXP_ALIAS = /[a-zA-Z0-9_\-]+/;
 var EXP_VAR = /%[a-zA-Z0-9_\-\:\.\_]+/;
 var EXP_CHANNEL = /#[a-zA-Z0-9_\-\_]+/;
-var EXP_IDENTIFIER = /\$[a-zA-Z0-9_\-\:\_]+/;
+
+var EXP_IDENTIFIER = new RegExp(
+  '^(' + EXP_VAR.source + '|' + EXP_CHANNEL.source + ')'
+);
 
 var COMPARISON_OPERATORS = [
   '==',         // equal to
