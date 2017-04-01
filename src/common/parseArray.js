@@ -66,13 +66,13 @@ function parseArray(props) {
 
     return {
       start : array[0].start,
-      end : array.slice(-1)[0].end,
+      end : array.slice(-1)[0].end + 1,
       value : array
     };
   } else {
     return {
       start : anchor,
-      end : i,
+      end : i + 1,
       value : array
     };
   }
