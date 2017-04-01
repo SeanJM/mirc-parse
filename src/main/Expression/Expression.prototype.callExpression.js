@@ -1,29 +1,62 @@
 (function () {
   function callExpression(props) {
     var i = this.start;
-    var array;
+    var n = this.end;
+    var step = 0;
+    var string = this.string;
+    var exp;
 
-    props.callee = this.identifierExpression({
-      start : i,
-      end : this.end,
-      string : this.string
-    });
-
+    props.callee = this.identifierExpression();
     i = props.callee.end;
 
-    array = parseArray({
-      start : i,
-      end : this.end,
-      string : this.string,
-      delimiter : ' '
-    });
+    while (/\s/.test(string[i])) i += 1;
 
-    props.end = array.end;
-    props.arguments = array.value.map(function (a) {
-      return new Expression(a);
-    });
+    if (/(-|\+)[a-zA-Z0-9]+\b/.test(string.substring(i, n))) {
+      props.switches = Expression.prototype.switches.call({
+        start : i,
+        end : n,
+        string : string
+      });
 
-    return props;
+      i = props.switches.end;
+      while (/\s/.test(string[i])) i += 1;
+    }
+
+    while (i < n) {
+      exp = new Expression({
+        string : string,
+        start : i,
+        end : n
+      });
+
+      if (exp.type) {
+        props.arguments.push(exp);
+      } else {
+        throw new Error({
+          type : 'INVALID_ARGUMENTS',
+          start : i,
+          end : n
+        });
+      }
+
+      if (exp.end === step) {
+        throw new Error({
+          type : 'BAD_EXPRESSION',
+          start : i,
+          end : n
+        });
+      }
+
+      step = i;
+      i = exp.end;
+      while (/\s/.test(string[i])) i += 1;
+    }
+
+    props.end = props.arguments.length
+      ? props.arguments.slice(-1)[0].end
+      : i;
+
+    this.end = props.end;
   }
 
   function getArgumentsI(props) {
@@ -88,6 +121,7 @@
       type : 'callExpression',
       callee : false,
       arguments : [],
+      switch : [],
       property : false,
       optional : false,
       required : false,
@@ -98,9 +132,11 @@
     var i = this.start;
 
     if (this.string[i] === '$') {
-      return callExpressionI.call(this, props);
+      callExpressionI.call(this, props);
+    } else {
+      callExpression.call(this, props);
     }
 
-    return callExpression.call(this, props);
+    return props;
   };
 }());
