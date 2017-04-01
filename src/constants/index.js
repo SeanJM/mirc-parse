@@ -1,5 +1,6 @@
 var EXP_ALIAS = /[a-zA-Z0-9_\-]+/;
 var EXP_VAR = /%[a-zA-Z0-9_\-\:\.\_]+/;
+var EXP_CHANNEL = /#[a-zA-Z0-9_\-\_]+/;
 var EXP_IDENTIFIER = /\$[a-zA-Z0-9_\-\:\_]+/;
 
 var COMPARISON_OPERATORS = [
@@ -76,6 +77,8 @@ var LOGICAL_OPERATORS = [
   '&&',
   '||'
 ];
+
+var BINARY_OPERATORS = COMPARISON_OPERATORS.concat(['$+']);
 
 var CONTROL_CODE = {};
 CONTROL_CODE[String.fromCharCode(3)] = 'color';
