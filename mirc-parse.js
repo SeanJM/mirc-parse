@@ -294,6 +294,9 @@ Expression.prototype.binaryExpression = function () {
       });
 
       if (exp.type) {
+        if (!props.arguments) {
+          props.arguments = [];
+        }
         props.arguments.push(exp);
       } else {
         throw new Error({
@@ -384,8 +387,8 @@ Expression.prototype.binaryExpression = function () {
     var props = {
       type : 'callExpression',
       callee : false,
-      arguments : [],
-      switch : [],
+      arguments : false,
+      switches : false,
       property : false,
       optional : false,
       required : false,
@@ -733,12 +736,13 @@ Statement.prototype.block = function () {
 */
 Statement.prototype.functionDeclaration = function () {
   var i = this.start;
-  var s = this.string;
+  var string = this.string;
 
   var props = {
     type : 'functionDeclaration',
     start : i,
     end : 0,
+    switches : false,
     id : {
       name : '',
     },
@@ -746,23 +750,31 @@ Statement.prototype.functionDeclaration = function () {
 
   i += 5;
 
-  while (/\s/.test(s[i])) {
-    i += 1;
+  while (/\s/.test(string[i])) i += 1;
+
+  if (string[i] === '-') {
+    props.switches = Expression.prototype.switches.call({
+      start : i,
+      end : this.end,
+      string : string
+    });
+    i = props.switches.end;
+    while (/\s/.test(string[i])) i += 1;
   }
 
   // Capture name
   props.id.start = i;
-  while (s[i] && !/\s|\{/.test(s[i])) {
-    props.id.name += s[i];
+  while (string[i] && !/\s|\{/.test(string[i])) {
+    props.id.name += string[i];
     i += 1;
   }
 
   props.id.end = i;
-  while (/\s/.test(s[i])) i += 1;
+  while (/\s/.test(string[i])) i += 1;
   this.start = i;
 
   props.body = new Statement({
-    string : s,
+    string : string,
     start : i,
     end : this.end
   });
