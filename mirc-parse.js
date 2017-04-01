@@ -68,6 +68,10 @@ function parseArray(props) {
       }
     }
 
+    if (CONTROL_CODE[s[i]] === 'color') {
+      while (i < n && !/\s/.test(s[i])) i += 1;
+    }
+
     if (delimiter_exp.test(s[i])) {
       array.push({
         start : anchor,
@@ -86,7 +90,7 @@ function parseArray(props) {
 
   while (/\s/.test(s[i - 1])) i -= 1; // Trim end
 
-  if (array.length) {
+  if (anchor < i) {
     array.push({
       start : anchor,
       end : i,
@@ -97,19 +101,24 @@ function parseArray(props) {
 
     return {
       start : array[0].start,
-      end : array.slice(-1)[0].end,
+      end : array.slice(-1)[0].end + 1,
       value : array
     };
   } else {
     return {
       start : anchor,
-      end : i,
+      end : i + 1,
       value : array
     };
   }
 }
 var EXP_ALIAS = /[a-zA-Z0-9_\-]+/;
 var EXP_VAR = /%[a-zA-Z0-9_\-\:\.\_]+/;
+var EXP_CHANNEL = /#[a-zA-Z0-9_\-\_]+/;
+
+var EXP_IDENTIFIER = new RegExp(
+  '^(' + EXP_VAR.source + '|' + EXP_CHANNEL.source + ')'
+);
 
 var COMPARISON_OPERATORS = [
   '==',         // equal to
@@ -185,9 +194,29 @@ var LOGICAL_OPERATORS = [
   '&&',
   '||'
 ];
+
+var BINARY_OPERATORS = COMPARISON_OPERATORS.concat(['$+']);
+
+var CONTROL_CODE = {};
+CONTROL_CODE[String.fromCharCode(3)] = 'color';
+CONTROL_CODE[String.fromCharCode(2)] = 'bold';
+CONTROL_CODE[String.fromCharCode(29)] = 'italics';
+CONTROL_CODE[String.fromCharCode(31)] = 'underline';
+CONTROL_CODE[String.fromCharCode(16)] = 'swap';
+CONTROL_CODE[String.fromCharCode(15)] = 'clear';
+/*
+  opt : {
+    start : Number,
+    end : Number,
+    string : String
+  }
+*/
+
 function Expression(opt) {
   let p = new Predicate(opt);
+
   Object.assign(this, opt);
+  this.type = false;
 
   if (p.isAssignmentExpression()) {
     return this.assignmentExpression();
@@ -203,8 +232,20 @@ function Expression(opt) {
     return this.literalExpression();
   }
 }
-Token.prototype.assignmentExpression = function () {
+Expression.prototype.assignmentExpression = function () {
+  var parts = parseArray({
+    start : this.start,
+    end : this.end,
+    string : this.string,
+    delimiter : ' '
+  });
 
+  return {
+    type : 'assignmentExpression',
+    operator : parts.value[1].slice,
+    left : new Expression(parts.value[0]),
+    right : new Expression(parts.value[2]),
+  };
 };
 Expression.prototype.binaryExpression = function () {
   var parts = parseArray({
@@ -224,29 +265,62 @@ Expression.prototype.binaryExpression = function () {
 (function () {
   function callExpression(props) {
     var i = this.start;
-    var array;
+    var n = this.end;
+    var step = 0;
+    var string = this.string;
+    var exp;
 
-    props.callee = this.identifierExpression({
-      start : i,
-      end : this.end,
-      string : this.string
-    });
-
+    props.callee = this.identifierExpression();
     i = props.callee.end;
 
-    array = parseArray({
-      start : i,
-      end : this.end,
-      string : this.string,
-      delimiter : ' '
-    });
+    while (/\s/.test(string[i])) i += 1;
 
-    props.end = array.end;
-    props.arguments = array.value.map(function (a) {
-      return new Expression(a);
-    });
+    if (/(-|\+)[a-zA-Z0-9]+\b/.test(string.substring(i, n))) {
+      props.switches = Expression.prototype.switches.call({
+        start : i,
+        end : n,
+        string : string
+      });
 
-    return props;
+      i = props.switches.end;
+      while (/\s/.test(string[i])) i += 1;
+    }
+
+    while (i < n) {
+      exp = new Expression({
+        string : string,
+        start : i,
+        end : n
+      });
+
+      if (exp.type) {
+        props.arguments.push(exp);
+      } else {
+        throw new Error({
+          type : 'INVALID_ARGUMENTS',
+          start : i,
+          end : n
+        });
+      }
+
+      if (exp.end === step) {
+        throw new Error({
+          type : 'BAD_EXPRESSION',
+          start : i,
+          end : n
+        });
+      }
+
+      step = i;
+      i = exp.end;
+      while (/\s/.test(string[i])) i += 1;
+    }
+
+    props.end = props.arguments.length
+      ? props.arguments.slice(-1)[0].end
+      : i;
+
+    this.end = props.end;
   }
 
   function getArgumentsI(props) {
@@ -310,7 +384,8 @@ Expression.prototype.binaryExpression = function () {
     var props = {
       type : 'callExpression',
       callee : false,
-      arguments : false,
+      arguments : [],
+      switch : [],
       property : false,
       optional : false,
       required : false,
@@ -321,29 +396,32 @@ Expression.prototype.binaryExpression = function () {
     var i = this.start;
 
     if (this.string[i] === '$') {
-      return callExpressionI.call(this, props);
+      callExpressionI.call(this, props);
+    } else {
+      callExpression.call(this, props);
     }
 
-    return callExpression.call(this, props);
+    return props;
   };
 }());
 
 Expression.prototype.identifierExpression = function () {
-  let s = this.string;
-  let i = this.start;
+  var s = this.string;
+  var i = this.start;
+  var n = this.end;
 
-  let props = {
+  var props = {
     type : 'identifier',
     start : i,
     name : ''
   };
 
-  let isMircIdentifier = s[i] === '$';
-  let regExp = isMircIdentifier
+  var isMircIdentifier = s[i] === '$';
+  var regExp = isMircIdentifier
     ? /\(|\s|\|/
     : /\s/;
 
-  while (s[i] && !regExp.test(s[i])) {
+  while (i < n && !regExp.test(s[i])) {
     props.name += s[i];
     i += 1;
   }
@@ -351,30 +429,107 @@ Expression.prototype.identifierExpression = function () {
   props.end = i;
   return props;
 };
-Expression.prototype.literal = function (opt) {
-};
 Expression.prototype.literalExpression = function () {
-  var value = this.string.substring(this.start, this.end);
-  var isNumber = /^[0-9]+(\.[0-9]+|)$/.test(value);
+  var i = this.start;
+  var n = this.end;
+  var string = this.string;
+
+  var value;
+  var isNumber;
+
+  while (i < n && !/^\s(%|\$)/.test(string.substring(i, i + 3))) {
+    i += 1;
+  }
+
+  value = string
+    .substring(this.start, i)
+    .replace(/\r\n|\n/g, '');
+
+  isNumber = /^[0-9]+(\.[0-9]+|)$/.test(value);
 
   return {
     type : 'literal',
     value : value,
     raw : isNumber ? value : '\'' + value + '\'',
     start : this.start,
-    end : this.end
+    end : i
   };
 };
-Token.prototype.logicalExpression = function () {
+Expression.prototype.logicalExpression = function () {
 
 };
-Token.prototype.unaryExpression = function () {
+Expression.prototype.switches = function () {
+  var value = [];
+  var match = [];
+
+  var i = this.start;
+  var string = this.string;
+
+  var n = Math.min.apply(null,
+    [
+      string.indexOf(' ', i),
+      string.indexOf('\r\n', i),
+      string.indexOf('\n', i),
+      this.end
+    ].filter(function (a) {
+      return a !== -1;
+    })
+  );
+
+  var prefix;
+  var slice;
+
+  while (i < n) {
+    if (string[i] === '-' || string[i] === '+') {
+      prefix = string[i];
+    } else {
+      slice = string.substring(i, n);
+
+      match[0] = slice.match(/^([a-zA-Z\@])([0-9]+)/);
+      match[1] = slice.match(/^[a-zA-Z\@]/);
+      match[2] = slice.match(/^[0-9]+/);
+
+      if (match[0]) {
+        value.push({
+          start : i,
+          end : i + match[0][0].length,
+          prefix : prefix,
+          switch : match[0][1],
+          number : Number(match[0][2]),
+        });
+        i += match[0][0].length - 1;
+      } else if (match[1]) {
+        value.push({
+          start : i,
+          end : i + match[1][0].length,
+          prefix : prefix,
+          switch : match[1][0],
+          number : false,
+        });
+      } else if (match[2]) {
+        value.push({
+          start : i,
+          end : i + match[2][0].length,
+          prefix : prefix,
+          switch : false,
+          number : match[2][0],
+        });
+        i += match[2][0].length - 1;
+      }
+    }
+
+    i += 1;
+  }
+
+  return {
+    start : this.start,
+    end : i,
+    value : value
+  };
+};
+Expression.prototype.unaryExpression = function () {
 
 };
-function Parser(opt) {
-  console.log(opt);
-  Object.assign(this, opt);
-}
 function ParseMirc(propsOrString) {
   this.body = [];
   this.newLine = true;
@@ -425,105 +580,6 @@ ParseMirc.prototype.parse = function () {
     body : this.body
   };
 };
-(function () {
-  function getType(content) {
-    /*
-      Identifier
-      - Identifier
-    */
-
-    /*
-      UnaryExpression
-      - !identifier
-    */
-
-    /*
-      BinaryExpression
-      - Identifier/Literal operator Identifier/Literal
-    */
-
-    /*
-      LogicalExpression
-      - Expression operator Expression
-    */
-  }
-
-  ParseMirc.prototype.parseConditional = function () {
-    var capture = between('(', ')', this.string.substring(this.start, this.end));
-    var s = this.string;
-    var i = capture.start + 1;
-    var n = capture.end + 1;
-
-    this.start = i;
-    this.end = n;
-    this.type = 'binaryExpression';
-
-    this.left = false;
-    this.right = false;
-    this.operator = false;
-
-    i = this.trimStart(i);
-
-    this.left = new ParseMirc({
-      start : i,
-      end : n,
-      string : s
-    }).parseToken();
-
-    i = this.trimStart(this.left.end);
-
-    if (['!', '=', '>', '<'].includes(s[i])) {
-      this.operator = new ParseMirc({
-        start : i,
-        end : n,
-        string : s
-      }).parseToken();
-    }
-
-    return {
-      type : this.type,
-      start : this.start,
-      end : this.end,
-      left : this.left,
-      operator : this.operator,
-      right : this.right,
-    };
-  };
-}());
-
-ParseMirc.prototype.parseToken = function () {
-  // Is a block
-  var s = this.string;
-  var i = this.start;
-  var n = this.end;
-
-  var newToken = true;
-  var loop = true;
-
-  while (i < n && loop) {
-    if (i > this.start && newToken && (s[i] === '%' || s[i] === '$' || s[i] === '\r' || s[i] === '\n')) {
-      loop = false;
-    } else if (/\s/.test(s[i])) {
-      newToken = true;
-    } else {
-      newToken = false;
-    }
-    i++;
-  }
-
-  i -= 1;
-  while (s[i] === '\n') {
-    i -= 1;
-  }
-  this.end = i;
-
-  return new Token({
-    start : this.start,
-    end : this.end,
-    string : this.string
-  }).parse();
-};
-
 ParseMirc.prototype.slice = function () {
   return this.string.substring(this.start, this.end);
 };
@@ -541,7 +597,8 @@ function Predicate(opt) {
 }
 Predicate.prototype.isAssignmentExpression = function () {
   var slice = this.string.substring(this.start, this.end);
-  return new RegExp(EXP_VAR.source + '(\\s+|)=').test(slice);
+  var exp = new RegExp(EXP_VAR.source + '(\\s+|)=[^=]');
+  return exp.test(slice);
 };
 /*
   - (A) === (B)
@@ -557,19 +614,27 @@ Predicate.prototype.isBinaryExpression = function () {
   });
 
   return (
-    parts.value.length === 3
-    && COMPARISON_OPERATORS.includes(parts.value[1].slice)
+    parts.value.length > 2
+    && BINARY_OPERATORS.includes(parts.value[1].slice)
   );
 };
 Predicate.prototype.isCallExpression = function () {
-   if (this.context === 'functionStatement') {
+  let slice = this.string.substring(this.start, this.end);
+
+  let isIdentifier = (
+    (slice[0] === '$' || /^\$+\(/.test(slice))
+    && !/^\$\+$/.test(slice)
+  );
+
+   if (isIdentifier || this.context === 'functionStatement') {
     return true;
   }
 };
 Predicate.prototype.isIdentifierExpression = function () {
   var slice = this.string.substring(this.start, this.end);
-  return EXP_VAR.test(slice);
+  return EXP_IDENTIFIER.test(slice);
 };
+
 /*
   - (A) && (B)
   - (A) || (B)
@@ -597,159 +662,6 @@ Predicate.prototype.isLogicalExpression = function () {
     && LOGICAL_OPERATORS.includes(parts.value[1].slice)
   );
 };
-/*
-  string : String,
-  index : Number
-*/
-function TypeParser(props) {
-  let i = props.start;
-  let s = props.string;
-  let n = props.end;
-  let sl = props.string.substring(i, n);
-
-  this.start = props.start;
-  this.end = props.end;
-  this.string = props.string;
-  this.slice = sl;
-
-  this.type = false;
-
-  if (/^if(\s+|)\(|^if\s+/.test(sl)) {
-    this.type = 'ifStatement';
-  } else if (s.substring(i, 3) === 'var') {
-    this.type = 'variableDeclaration';
-  } else if (s.substring(i, 5) === 'alias') {
-    this.type = 'aliasDeclaration';
-  } else if (s.substring(i, 6) === 'return') {
-    this.type = 'returnStatement';
-  } else if (/^%[\:\.a-zA-Z0-9]+(\s+|)=/.test(sl)) {
-    this.type = 'variableAssignment';
-  } else if (/^%[\:\.a-zA-Z0-9]+/.test(sl) && props.isNewLine) {
-    this.type = 'expressionStatement';
-  } else if (/^(\/|)[a-zA-Z0-9]+/.test(sl) && props.isNewLine) {
-    this.type = 'expressionStatement';
-  } else if (/^\$[A-Za-z0-9\_]+/.test(sl)) {
-    this.type = 'expressionStatement';
-  }
-}
-TypeParser.prototype.identifierArguments = function (opt) {
-  var s = opt.string;
-  var capture = between('(', ')', s.substring(opt.start, opt.end));
-
-  var i = capture.start + 1;
-  var n = capture.end + 1;
-  var anchor = i;
-
-  var props = [];
-
-  while (i < n) {
-    if (s[i] === '[') {
-      i += (
-        between('[', ']', s.substring(i, n))
-        || { end : 1 }
-      ).end;
-    } else if (s[i] === '(') {
-      i += (
-        between('(', ')', s.substring(i, n))
-        || { end : 1 }
-      ).end;
-    }
-
-    if (s[i] === ',' || i === n - 1) {
-      props.push(new ParseMirc({
-        string : s,
-        start : anchor,
-        end : i
-      }).parse());
-
-      anchor = i + 1;
-    }
-
-    i += 1;
-  }
-
-  console.log(props);
-
-  return props;
-};
-/*
-  a operator b
-*/
-TypeParser.prototype.isBinaryExpression = function () {
-  let i = this.start;
-  let n = this.end;
-  let s = this.string;
-
-  let props = {
-    left : {
-      start : 0,
-      end : 0
-    },
-    operator : {
-      start : 0,
-      end : 0
-    },
-    right : {
-      start : 0,
-      end : 0
-    }
-  };
-
-  let key = 'left';
-  let anchor = i;
-
-  while (/\s/.test(s[i])) {
-    i += 1;
-  }
-
-  while (i < n) {
-    if (['==', '!=', '<=', '>='].includes(s.substring(i, i + 2))) {
-      props.operator.start = i;
-      props.operator.end = i + 2;
-      i += 2;
-      key = 'right';
-    } else if ('<' === s[i] || '>' === s[i]) {
-      props.operator.start = i;
-      props.operator.end = i + 1;
-      i += 1;
-      key = 'right';
-    }
-
-    // $identifier(arguments) or $identifier(arguments).property
-    if (s[i] === '$') {
-      while (/[\$a-zA-Z0-9_\-]/.test(s[i])) i += 1;
-
-      if (s[i] === '(') {
-        i += (
-          between('(', ')', s.substring(anchor, n))
-          || { end : 1 }
-        ).end;
-      }
-
-      while (/\s/.test(s[i])) i += 1;
-
-      if (s[i] === '.') {
-        while (/[a-zA-Z0-9_]/.test(s[i])) i += 1;
-      }
-    } else if (s[i] === '[') {
-      i += (
-        between('[', ']', s.substring(anchor, n))
-        || { end : 1 }
-      ).end;
-    }
-
-    i += 1;
-    props[key].end = i;
-  }
-};
-/*
-  string : String,
-  index : Number
-*/
-TypeParser.prototype.parse = function (props) {
-  console.log(this.type);
-  return this[this.type](props);
-};
 function Statement(opt) {
   let slice = opt.string.substring(opt.start, opt.end).trim();
   Object.assign(this, opt);
@@ -760,18 +672,20 @@ function Statement(opt) {
     return this.assignmentStatement();
   } else if (/^(\/|)alias\b/.test(slice)) {
     return this.functionDeclaration();
-  } else if (/^(\/|)[a-zA-Z0-9\-\_]+/.test(slice)) {
-    return this.functionStatement();
-  } else if (/^\$[a-zA-Z0-9\-\_]+/.test(slice)) {
-    return this.functionStatement();
-  } else if (/^\%[\:\.a-zA-Z0-9\-\_]+/.test(slice)) {
-    return this.functionStatement();
   } else if (/^(\/|)return\b/.test(slice)) {
     return this.returnStatement();
   } else if (/^(\/|)halt\b/.test(slice)) {
     return this.haltStatement();
   } else if (/^if\b/.test(slice)) {
     return this.ifStatement();
+  } else if (slice[0] === '{') {
+    return this.block();
+  } else if (/^(\/|)[a-zA-Z0-9\-\_]+/.test(slice)) {
+    return this.functionStatement();
+  } else if (/^\$[a-zA-Z0-9\-\_]+/.test(slice)) {
+    return this.functionStatement();
+  } else if (/^\%[\:\.a-zA-Z0-9\-\_]+/.test(slice)) {
+    return this.functionStatement();
   }
 }
 Statement.prototype.assignmentStatement = function () {
@@ -846,7 +760,13 @@ Statement.prototype.functionDeclaration = function () {
   props.id.end = i;
   while (/\s/.test(s[i])) i += 1;
   this.start = i;
-  props.body = this.block();
+
+  if (s[i] === '{') {
+    props.body = this.block();
+  } else {
+    props.body = this.inline();
+  }
+
   props.end = props.body.end;
 
   return props;
@@ -880,35 +800,74 @@ Statement.prototype.haltStatement = function () {
     value : []
   };
 };
-Statement.prototype.ifStatement = function (opt) {
-  var s = opt.string;
-  var i = opt.start;
-
-  var props = {
-    type : 'ifStatement',
-    start : i,
-    end : 0,
-    test : {},
-    consequent : false,
-    alternate : false
-  };
-
-  if (/^if(\s+|)\(/.test(s)) {
-    props.test = new ParseMirc({
-      string : s,
-      start : i
-    }).parseConditional();
+(function () {
+  function parseTestParens() {
+    var b = between('(', ')', this.string.substring(this.start, this.end));
+    return new Expression({
+      start : this.start + b.start + 1,
+      end : this.start + b.end,
+      string : this.string
+    });
   }
 
-  i = props.test.end;
-  props.consequent = new ParseMirc({
-    string : s,
-    start : i
-  }).parseBlock();
-  props.end = props.consequent.end;
+  Statement.prototype.ifStatement = function () {
+    var s = this.string;
+    var i = this.start;
+    var n = this.end;
 
-  // Capture name
-  return props;
+    var type = 'ifStatement';
+
+    var props = {
+      type : type,
+      start : i,
+      end : 0,
+      test : false,
+      consequent : false,
+      alternate : false
+    };
+
+    i += 2;
+    if (/^(\s+|)\(/.test(s.substring(i, n))) {
+      props.test = parseTestParens.call(this);
+      i = props.test.end + 1;
+    } else {
+      while (i < n && /\s/.test(s[i])) i += 1;
+      props.test = new Expression({
+        start : i,
+        end : n,
+        string : s
+      });
+      i = props.test.end;
+    }
+
+    while (i < n && /\s/.test(s[i])) i += 1;
+
+    props.consequent = new Statement({
+      string : s,
+      start : i,
+      end : n
+    });
+    props.end = props.consequent.end;
+
+    // Capture name
+    return props;
+  };
+}());
+Statement.prototype.inline = function () {
+  var i = this.start;
+  var n = this.end;
+  var string = this.string;
+
+  while (i < n && !/\r\n|\n/.test(string[i])) {
+    i += 1;
+  }
+
+  return new ParseMirc({
+    type : 'blockStatement',
+    start : this.start,
+    end : i,
+    string : string
+  }).parse();
 };
 Statement.prototype.returnStatement = function () {
   return {
@@ -919,58 +878,26 @@ Statement.prototype.returnStatement = function () {
   };
 };
 Statement.prototype.variableDeclaration = function () {
+  var declarations = parseArray({
+    start : this.start + 3,
+    end : this.end,
+    string : this.string,
+    delimiter : ','
+  });
+
+  var self = this;
+
   return {
     type : 'variableDeclaration',
-    start : this.body.start,
-    end : this.body.end,
-    declarations : []
-  };
-};
-function Token(opt) {
-  this.start = opt.start;
-  this.end = opt.end;
-  this.string = opt.string;
-
-  this.token = this.string.substring(this.start, this.end);
-  this.getType();
-}
-Token.prototype.getType = function () {
-  if (/\$(\$|)[a-zA-Z]/.test(this.token)) {
-    this.type = 'expressionStatement';
-  } else if (/%[a-zA-Z:_\-0-9]/.test(this.token)) {
-    this.type = 'identifier';
-  } else {
-    this.type = 'stringLiteral';
-  }
-};
-Token.prototype.identifier = function () {
-  let i = this.start;
-  let n = this.end;
-  let s = this.string;
-
-  let props = {
-    start : this.start,
-    end : 0,
-    type : this.type,
-    name : ''
-  };
-
-  while (i < n && !/\s/.test(s[i])) {
-    props.name += s[i];
-    i += 1;
-  }
-  props.end = i;
-  return props;
-};
-Token.prototype.parse = function () {
-  return this[this.type]();
-};
-Token.prototype.stringLiteral = function () {
-  return {
     start : this.start,
     end : this.end,
-    type : this.type,
-    value : this.token
+    declarations : declarations.value.map(function (a) {
+      return new Expression({
+        start : a.start,
+        end : a.end,
+        string : self.string
+      });
+    })
   };
 };
 if (typeof module === 'object') {
