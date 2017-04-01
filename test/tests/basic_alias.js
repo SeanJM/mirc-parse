@@ -20,6 +20,7 @@ module.exports = {
           "type": "functionDeclaration",
           "start": 0,
           "end": 43,
+          "switches": {},
           "id": {
             "name": "basic",
             "start": 6,
@@ -51,7 +52,7 @@ module.exports = {
                       "end": 43
                     }
                   ],
-                  "switch": [],
+                  "switches": {},
                   "property": false,
                   "optional": false,
                   "required": false,

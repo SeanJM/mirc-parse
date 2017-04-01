@@ -48,7 +48,7 @@ module.exports = {
                 }
               }
             ],
-            "switch": [],
+            "switches": false,
             "property": false,
             "optional": false,
             "required": false,

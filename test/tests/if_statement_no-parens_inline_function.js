@@ -47,7 +47,7 @@ module.exports = {
                   "end": 16
                 }
               ],
-              "switch": [],
+              "switches": false,
               "property": false,
               "optional": false,
               "required": false,

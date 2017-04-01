@@ -28,8 +28,8 @@ module.exports = {
               "name": "strip",
               "end": 5
             },
-            "arguments": [],
-            "switch": [],
+            "arguments": false,
+            "switches": false,
             "property": false,
             "optional": false,
             "required": false,

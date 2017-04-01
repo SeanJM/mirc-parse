@@ -20,6 +20,7 @@ module.exports = {
           "type": "functionDeclaration",
           "start": 0,
           "end": 55,
+          "switches": false,
           "id": {
             "name": "carbon.whowas",
             "start": 6,
@@ -83,7 +84,7 @@ module.exports = {
                                   }
                                 ]
                               },
-                              "switch": [],
+                              "switches": false,
                               "property": false,
                               "optional": false,
                               "required": false,
@@ -99,7 +100,7 @@ module.exports = {
                             }
                           ]
                         },
-                        "switch": [],
+                        "switches": false,
                         "property": false,
                         "optional": false,
                         "required": false,
@@ -114,7 +115,7 @@ module.exports = {
                       }
                     ]
                   },
-                  "switch": [],
+                  "switches": false,
                   "property": false,
                   "optional": false,
                   "required": false,
@@ -122,7 +123,7 @@ module.exports = {
                   "end": 55
                 }
               ],
-              "switch": [],
+              "switches": false,
               "property": false,
               "optional": false,
               "required": false,

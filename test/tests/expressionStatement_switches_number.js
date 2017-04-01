@@ -28,8 +28,8 @@ module.exports = {
               "name": "autojoin",
               "end": 8
             },
-            "arguments": [],
-            "switch": [],
+            "arguments": false,
+            "switches": false,
             "property": false,
             "optional": false,
             "required": false,

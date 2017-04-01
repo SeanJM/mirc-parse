@@ -30,6 +30,9 @@
       });
 
       if (exp.type) {
+        if (!props.arguments) {
+          props.arguments = [];
+        }
         props.arguments.push(exp);
       } else {
         throw new Error({
@@ -120,8 +123,8 @@
     var props = {
       type : 'callExpression',
       callee : false,
-      arguments : [],
-      switch : [],
+      arguments : false,
+      switches : false,
       property : false,
       optional : false,
       required : false,

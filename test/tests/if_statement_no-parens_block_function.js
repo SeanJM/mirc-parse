@@ -52,7 +52,7 @@ module.exports = {
                       "end": 23
                     }
                   ],
-                  "switch": [],
+                  "switches": false,
                   "property": false,
                   "optional": false,
                   "required": false,

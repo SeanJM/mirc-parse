@@ -28,8 +28,8 @@ module.exports = {
               "name": "$expressionStatement",
               "end": 20
             },
-            "switch": [],
-            "arguments": [],
+            "arguments": false,
+            "switches": false,
             "property": false,
             "optional": false,
             "required": false,

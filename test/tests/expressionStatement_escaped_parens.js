@@ -28,7 +28,7 @@ module.exports = {
               "name": "echo",
               "end": 4
             },
-            "switch": [],
+            "switches": false,
             "arguments": [
               {
                 "type": "literal",

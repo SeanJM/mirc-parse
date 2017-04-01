@@ -28,8 +28,8 @@ module.exports = {
               "name": "$cat",
               "end": 8
             },
-            "switch": [],
-            "arguments": [],
+            "switches": false,
+            "arguments": false,
             "property": false,
             "optional": false,
             "required": false,
@@ -62,7 +62,7 @@ module.exports = {
                       "end": 25
                     }
                   ],
-                  "switch": [],
+                  "switches": false,
                   "property": false,
                   "optional": false,
                   "required": false,
