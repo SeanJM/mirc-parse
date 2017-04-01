@@ -1,0 +1,1 @@
+ban -u120k #channel nickname

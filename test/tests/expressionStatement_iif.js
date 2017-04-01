@@ -30,7 +30,7 @@ module.exports = {
             },
             "arguments": {
               "start": 5,
-              "end": 23,
+              "end": 24,
               "value": [
                 {
                   "type": "binaryExpression",
@@ -65,11 +65,12 @@ module.exports = {
                 }
               ]
             },
+            "switch": [],
             "property": false,
             "optional": false,
             "required": false,
             "start": 0,
-            "end": 23
+            "end": 24
           }
         }
       ]

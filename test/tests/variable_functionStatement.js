@@ -28,6 +28,7 @@ module.exports = {
               "name": "%identifier",
               "end": 11
             },
+            "switch": [],
             "arguments": [],
             "property": false,
             "optional": false,

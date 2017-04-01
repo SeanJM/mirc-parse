@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  name : 'Function Statement (echo string)',
+  name : 'Concatenation',
   this : function () {
-    const str = fs.readFileSync(path.resolve('test/mrc/echo_string.mrc'), 'utf8');
+    const str = fs.readFileSync(path.resolve('test/mrc/concatenation.mrc'), 'utf8');
     const parser = new ParseMirc(str);
     const result = parser.parse(str);
     return result;
@@ -14,12 +14,12 @@ module.exports = {
     return {
       "type": "mirc",
       "start": 0,
-      "end": 26,
+      "end": 22,
       "body": [
         {
           "type": "functionStatement",
           "start": 0,
-          "end": 26,
+          "end": 22,
           "expression": {
             "type": "callExpression",
             "callee": {
@@ -28,21 +28,31 @@ module.exports = {
               "name": "echo",
               "end": 4
             },
-            "switch": [],
             "arguments": [
               {
-                "type": "literal",
-                "value": "should be one token",
-                "raw": "'should be one token'",
-                "start": 5,
-                "end": 26
+                "type": "binaryExpression",
+                "operator": "$+",
+                "left": {
+                  "type": "literal",
+                  "value": "concat",
+                  "raw": "'concat'",
+                  "start": 5,
+                  "end": 11
+                },
+                "right": {
+                  "type": "literal",
+                  "value": "enate",
+                  "raw": "'enate'",
+                  "start": 15,
+                  "end": 20
+                }
               }
             ],
+            "switch": [],
             "property": false,
             "optional": false,
             "required": false,
-            "start": 0,
-            "end": 26
+            "start": 0
           }
         }
       ]

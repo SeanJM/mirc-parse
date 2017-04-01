@@ -3,12 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  name : 'If statement',
+  name : 'If Statement (parens, identifier, block, function)',
   this : function () {
-    const str = fs.readFileSync(path.resolve('test/mrc/if_statement_expressionStatement.mrc'), 'utf8');
+    const str = fs.readFileSync(path.resolve('test/mrc/if_statement_parens_identifier_block_function.mrc'), 'utf8');
     const parser = new ParseMirc(str);
     const result = parser.parse(str);
-    console.log(JSON.stringify(result, null, '  '));
     return result;
   },
   isDeepEqual : function () {
@@ -22,17 +21,20 @@ module.exports = {
           "start": 0,
           "end": 25,
           "test": {
-            "type": "binaryExpression",
-            "start": 4,
-            "end": 9,
-            "left": {
-              "start": 4,
-              "end": 8,
+            "type": "callExpression",
+            "callee": {
               "type": "identifier",
-              "name": "%cat"
+              "start": 4,
+              "name": "$cat",
+              "end": 8
             },
-            "operator": false,
-            "right": false
+            "switch": [],
+            "arguments": [],
+            "property": false,
+            "optional": false,
+            "required": false,
+            "start": 4,
+            "end": 8
           },
           "consequent": {
             "type": "blockStatement",
@@ -40,12 +42,12 @@ module.exports = {
             "end": 25,
             "body": [
               {
-                "type": "expressionStatement",
+                "type": "functionStatement",
                 "start": 15,
                 "end": 25,
                 "expression": {
-                  "start": 15,
-                  "calle": {
+                  "type": "callExpression",
+                  "callee": {
                     "type": "identifier",
                     "start": 15,
                     "name": "echo",
@@ -53,12 +55,19 @@ module.exports = {
                   },
                   "arguments": [
                     {
+                      "type": "literal",
+                      "value": "cat",
+                      "raw": "'cat'",
                       "start": 20,
-                      "end": 23,
-                      "type": "stringLiteral",
-                      "value": "cat"
+                      "end": 25
                     }
-                  ]
+                  ],
+                  "switch": [],
+                  "property": false,
+                  "optional": false,
+                  "required": false,
+                  "start": 0,
+                  "end": 25
                 }
               }
             ]

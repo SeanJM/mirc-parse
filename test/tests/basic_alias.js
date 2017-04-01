@@ -45,38 +45,18 @@ module.exports = {
                   "arguments": [
                     {
                       "type": "literal",
-                      "value": "should",
-                      "raw": "'should'",
+                      "value": "should be one token",
+                      "raw": "'should be one token'",
                       "start": 22,
-                      "end": 28
-                    },
-                    {
-                      "type": "literal",
-                      "value": "be",
-                      "raw": "'be'",
-                      "start": 29,
-                      "end": 31
-                    },
-                    {
-                      "type": "literal",
-                      "value": "one",
-                      "raw": "'one'",
-                      "start": 32,
-                      "end": 35
-                    },
-                    {
-                      "type": "literal",
-                      "value": "token",
-                      "raw": "'token'",
-                      "start": 36,
-                      "end": 41
+                      "end": 43
                     }
                   ],
+                  "switch": [],
                   "property": false,
                   "optional": false,
                   "required": false,
                   "start": 0,
-                  "end": 41
+                  "end": 43
                 }
               }
             ]

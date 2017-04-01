@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  name : 'Function Statement (echo string)',
+  name : 'Expression Statement (echo -at)',
   this : function () {
-    const str = fs.readFileSync(path.resolve('test/mrc/echo_string.mrc'), 'utf8');
+    const str = fs.readFileSync(path.resolve('test/mrc/expressionStatement_switches.mrc'), 'utf8');
     const parser = new ParseMirc(str);
     const result = parser.parse(str);
     return result;
@@ -14,12 +14,12 @@ module.exports = {
     return {
       "type": "mirc",
       "start": 0,
-      "end": 26,
+      "end": 13,
       "body": [
         {
           "type": "functionStatement",
           "start": 0,
-          "end": 26,
+          "end": 13,
           "expression": {
             "type": "callExpression",
             "callee": {
@@ -28,21 +28,41 @@ module.exports = {
               "name": "echo",
               "end": 4
             },
-            "switch": [],
             "arguments": [
               {
                 "type": "literal",
-                "value": "should be one token",
-                "raw": "'should be one token'",
-                "start": 5,
-                "end": 26
+                "value": "test",
+                "raw": "'test'",
+                "start": 9,
+                "end": 13
               }
             ],
+            "switch": [],
             "property": false,
             "optional": false,
             "required": false,
             "start": 0,
-            "end": 26
+            "end": 13,
+            "switches": {
+              "start": 5,
+              "end": 8,
+              "value": [
+                {
+                  "start": 6,
+                  "end": 7,
+                  "prefix": "-",
+                  "switch": "a",
+                  "number": false
+                },
+                {
+                  "start": 7,
+                  "end": 8,
+                  "prefix": "-",
+                  "switch": "t",
+                  "number": false
+                }
+              ]
+            }
           }
         }
       ]
