@@ -26,116 +26,109 @@ module.exports = {
             "end": 19
           },
           "body": {
-            "type": "blockStatement",
+            "type": "functionStatement",
             "start": 20,
             "end": 55,
-            "body": [
-              {
-                "type": "functionStatement",
+            "expression": {
+              "type": "callExpression",
+              "callee": {
+                "type": "identifier",
                 "start": 20,
-                "end": 55,
-                "expression": {
+                "name": "%:echo",
+                "end": 26
+              },
+              "arguments": [
+                {
                   "type": "callExpression",
                   "callee": {
                     "type": "identifier",
-                    "start": 20,
-                    "name": "%:echo",
-                    "end": 26
+                    "start": 27,
+                    "name": "$+",
+                    "end": 29
                   },
-                  "arguments": [
-                    {
-                      "type": "callExpression",
-                      "callee": {
-                        "type": "identifier",
-                        "start": 27,
-                        "name": "$+",
-                        "end": 29
-                      },
-                      "arguments": {
-                        "start": 30,
-                        "end": 55,
-                        "value": [
-                          {
-                            "type": "callExpression",
-                            "callee": {
-                              "type": "identifier",
-                              "start": 30,
-                              "name": "$str",
-                              "end": 34
-                            },
-                            "arguments": {
-                              "start": 35,
-                              "end": 47,
-                              "value": [
-                                {
-                                  "type": "callExpression",
-                                  "callee": {
-                                    "type": "identifier",
-                                    "start": 35,
-                                    "name": "$chr",
-                                    "end": 39
-                                  },
-                                  "arguments": {
+                  "arguments": {
+                    "start": 30,
+                    "end": 55,
+                    "value": [
+                      {
+                        "type": "callExpression",
+                        "callee": {
+                          "type": "identifier",
+                          "start": 30,
+                          "name": "$str",
+                          "end": 34
+                        },
+                        "arguments": {
+                          "start": 35,
+                          "end": 47,
+                          "value": [
+                            {
+                              "type": "callExpression",
+                              "callee": {
+                                "type": "identifier",
+                                "start": 35,
+                                "name": "$chr",
+                                "end": 39
+                              },
+                              "arguments": {
+                                "start": 40,
+                                "end": 44,
+                                "value": [
+                                  {
+                                    "type": "literal",
+                                    "value": "160",
+                                    "raw": "160",
                                     "start": 40,
-                                    "end": 44,
-                                    "value": [
-                                      {
-                                        "type": "literal",
-                                        "value": "160",
-                                        "raw": "160",
-                                        "start": 40,
-                                        "end": 43
-                                      }
-                                    ]
-                                  },
-                                  "switch": [],
-                                  "property": false,
-                                  "optional": false,
-                                  "required": false,
-                                  "start": 35,
-                                  "end": 44
-                                },
-                                {
-                                  "type": "literal",
-                                  "value": "3",
-                                  "raw": "3",
-                                  "start": 45,
-                                  "end": 46
-                                }
-                              ]
+                                    "end": 43
+                                  }
+                                ]
+                              },
+                              "switch": [],
+                              "property": false,
+                              "optional": false,
+                              "required": false,
+                              "start": 35,
+                              "end": 44
                             },
-                            "switch": [],
-                            "property": false,
-                            "optional": false,
-                            "required": false,
-                            "start": 30,
-                            "end": 47
-                          },
-                          {
-                            "type": "identifier",
-                            "start": 48,
-                            "name": "%::pre",
-                            "end": 54
-                          }
-                        ]
+                            {
+                              "type": "literal",
+                              "value": "3",
+                              "raw": "3",
+                              "start": 45,
+                              "end": 46
+                            }
+                          ]
+                        },
+                        "switch": [],
+                        "property": false,
+                        "optional": false,
+                        "required": false,
+                        "start": 30,
+                        "end": 47
                       },
-                      "switch": [],
-                      "property": false,
-                      "optional": false,
-                      "required": false,
-                      "start": 27,
-                      "end": 55
-                    }
-                  ],
+                      {
+                        "type": "identifier",
+                        "start": 48,
+                        "name": "%::pre",
+                        "end": 54
+                      }
+                    ]
+                  },
                   "switch": [],
                   "property": false,
                   "optional": false,
                   "required": false,
-                  "start": 0,
+                  "start": 27,
                   "end": 55
                 }
-              }
-            ]
+              ],
+              "switch": [],
+              "property": false,
+              "optional": false,
+              "required": false,
+              "start": 0,
+              "end": 55
+            }
           }
         }
       ]

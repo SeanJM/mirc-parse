@@ -761,11 +761,11 @@ Statement.prototype.functionDeclaration = function () {
   while (/\s/.test(s[i])) i += 1;
   this.start = i;
 
-  if (s[i] === '{') {
-    props.body = this.block();
-  } else {
-    props.body = this.inline();
-  }
+  props.body = new Statement({
+    string : s,
+    start : i,
+    end : this.end
+  });
 
   props.end = props.body.end;
 
@@ -853,22 +853,6 @@ Statement.prototype.haltStatement = function () {
     return props;
   };
 }());
-Statement.prototype.inline = function () {
-  var i = this.start;
-  var n = this.end;
-  var string = this.string;
-
-  while (i < n && !/\r\n|\n/.test(string[i])) {
-    i += 1;
-  }
-
-  return new ParseMirc({
-    type : 'blockStatement',
-    start : this.start,
-    end : i,
-    string : string
-  }).parse();
-};
 Statement.prototype.returnStatement = function () {
   return {
     type : 'returnStatement',

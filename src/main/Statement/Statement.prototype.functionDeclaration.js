@@ -32,11 +32,11 @@ Statement.prototype.functionDeclaration = function () {
   while (/\s/.test(s[i])) i += 1;
   this.start = i;
 
-  if (s[i] === '{') {
-    props.body = this.block();
-  } else {
-    props.body = this.inline();
-  }
+  props.body = new Statement({
+    string : s,
+    start : i,
+    end : this.end
+  });
 
   props.end = props.body.end;
 
