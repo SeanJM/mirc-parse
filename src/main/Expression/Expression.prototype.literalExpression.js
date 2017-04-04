@@ -5,14 +5,26 @@ Expression.prototype.literalExpression = function () {
 
   var value;
   var isNumber;
+  var capture = i < n;
 
-  while (i < n && !/^\s(%|\$)/.test(string.substring(i, i + 3))) {
+  while (capture) {
+    if (CONTROL_CODE[string[i]]) {
+      while (i < n && !/\s/.test(string[i])) i += 1;
+    }
+
+    if (/^\s(%|\$|\|)/.test(string.substring(i, i + 3))) {
+      capture = false;
+    } else {
+      capture = i < n;
+    }
+
     i += 1;
   }
 
   value = string
     .substring(this.start, i)
-    .replace(/\r\n|\n/g, '');
+    .replace(/\r\n|\n/g, '')
+    .trimRight();
 
   isNumber = /^[0-9]+(\.[0-9]+|)$/.test(value);
 
