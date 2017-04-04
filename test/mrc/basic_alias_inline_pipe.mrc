@@ -1,0 +1,1 @@
+alias pipe echo -t lest | echo -a test

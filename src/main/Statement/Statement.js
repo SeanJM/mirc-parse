@@ -1,5 +1,6 @@
 function Statement(opt) {
   let slice = opt.string.substring(opt.start, opt.end).trim();
+  let p = new Predicate(opt);
   Object.assign(this, opt);
 
   if (/^(\/|)var\b/.test(slice)) {
@@ -14,6 +15,8 @@ function Statement(opt) {
     return this.haltStatement();
   } else if (/^if\b/.test(slice)) {
     return this.ifStatement();
+  } else if (p.isPipeStatement()) {
+    return this.pipe();
   } else if (slice[0] === '{') {
     return this.block();
   } else if (/^(\/|)[a-zA-Z0-9\-\_]+/.test(slice)) {
