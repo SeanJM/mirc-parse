@@ -21,10 +21,11 @@ Expression.prototype.literalExpression = function () {
     i += 1;
   }
 
-  value = string
-    .substring(this.start, i)
-    .replace(/\r\n|\n/g, '')
-    .trimRight();
+  i -= 1;
+
+  while (/\s/.test(string[i - 1])) i -= 1;
+
+  value = string.substring(this.start, i);
 
   isNumber = /^[0-9]+(\.[0-9]+|)$/.test(value);
 
