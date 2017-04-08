@@ -14,12 +14,12 @@ function Expression(opt) {
 
   if (p.isAssignmentExpression()) {
     return this.assignmentExpression();
-  } else if (p.isLogicalExpression()) {
-
-  } else if (p.isBinaryExpression()) {
-    return this.binaryExpression();
   } else if (p.isCallExpression()) {
     return this.callExpression();
+  } else if (p.isLogicalExpression()) {
+    return this.logicalExpression();
+  } else if (p.isBinaryExpression()) {
+    return this.binaryExpression();
   } else if (p.isIdentifierExpression()) {
     return this.identifierExpression();
   } else if (p.isLiteralExpression()) {
