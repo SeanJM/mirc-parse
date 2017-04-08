@@ -11,8 +11,12 @@ Predicate.prototype.isBinaryExpression = function () {
     delimiter : ' '
   });
 
+  var operator = parts.value.filter(function (a) {
+    return BINARY_OPERATORS.indexOf(a.slice) > -1;
+  });
+
   return (
     parts.value.length > 2
-    && BINARY_OPERATORS.includes(parts.value[1].slice)
+    && operator.length > 0
   );
 };

@@ -11,8 +11,12 @@ Predicate.prototype.isLogicalExpression = function () {
     delimiter : ' '
   });
 
+  var operator = parts.value.filter(function (a) {
+    return LOGICAL_OPERATORS.indexOf(a.slice) > -1;
+  });
+
   return (
     parts.value.length > 2
-    && LOGICAL_OPERATORS.includes(parts.value[1].slice)
+    && operator.length > 0
   );
 };
