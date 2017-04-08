@@ -51,7 +51,7 @@ module.exports = {
               "property": false,
               "optional": false,
               "required": false,
-              "start": 0,
+              "start": 8,
               "end": 16
             }
           },

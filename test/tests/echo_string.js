@@ -34,7 +34,7 @@ module.exports = {
                 "value": "should be one token",
                 "raw": "'should be one token'",
                 "start": 5,
-                "end": 26
+                "end": 24
               }
             ],
             "switches": false,
@@ -42,7 +42,7 @@ module.exports = {
             "optional": false,
             "required": false,
             "start": 0,
-            "end": 26
+            "end": 24
           }
         }
       ]

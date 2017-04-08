@@ -49,7 +49,7 @@ module.exports = {
                       "value": "lest",
                       "raw": "'lest'",
                       "start": 19,
-                      "end": 24
+                      "end": 23
                     }
                   ],
                   "switches": {
@@ -68,8 +68,8 @@ module.exports = {
                   "property": false,
                   "optional": false,
                   "required": false,
-                  "start": 0,
-                  "end": 24
+                  "start": 11,
+                  "end": 23
                 }
               },
               {
@@ -90,7 +90,7 @@ module.exports = {
                       "value": "test",
                       "raw": "'test'",
                       "start": 34,
-                      "end": 39
+                      "end": 38
                     }
                   ],
                   "switches": {
@@ -109,8 +109,8 @@ module.exports = {
                   "property": false,
                   "optional": false,
                   "required": false,
-                  "start": 0,
-                  "end": 39
+                  "start": 26,
+                  "end": 38
                 }
               }
             ]

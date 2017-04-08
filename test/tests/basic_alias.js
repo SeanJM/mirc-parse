@@ -49,15 +49,15 @@ module.exports = {
                       "value": "should be one token",
                       "raw": "'should be one token'",
                       "start": 22,
-                      "end": 43
+                      "end": 41
                     }
                   ],
-                  "switches": {},
+                  "switches": false,
                   "property": false,
                   "optional": false,
                   "required": false,
-                  "start": 0,
-                  "end": 43
+                  "start": 17,
+                  "end": 41
                 }
               }
             ]

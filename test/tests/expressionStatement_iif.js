@@ -47,7 +47,9 @@ module.exports = {
                     "raw": "2",
                     "start": 13,
                     "end": 14
-                  }
+                  },
+                  "start": 5,
+                  "end": 14,
                 },
                 {
                   "type": "literal",

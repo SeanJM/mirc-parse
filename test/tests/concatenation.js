@@ -45,13 +45,16 @@ module.exports = {
                   "raw": "'enate'",
                   "start": 15,
                   "end": 20
-                }
+                },
+                "start": 5,
+                "end": 22
               }
             ],
             "switches": false,
             "property": false,
             "optional": false,
             "required": false,
+            "end": 22,
             "start": 0
           }
         }

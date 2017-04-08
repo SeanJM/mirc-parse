@@ -49,15 +49,15 @@ module.exports = {
                       "value": "cat",
                       "raw": "'cat'",
                       "start": 20,
-                      "end": 25
+                      "end": 23
                     }
                   ],
                   "switches": false,
                   "property": false,
                   "optional": false,
                   "required": false,
-                  "start": 0,
-                  "end": 25
+                  "start": 15,
+                  "end": 23
                 }
               }
             ]

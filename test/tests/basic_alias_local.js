@@ -139,7 +139,7 @@ module.exports = {
               "property": false,
               "optional": false,
               "required": false,
-              "start": 0,
+              "start": 23,
               "end": 58
             }
           }
