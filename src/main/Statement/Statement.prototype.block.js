@@ -9,7 +9,7 @@ Statement.prototype.block = function () {
   if (s[i] === '{') {
     capture = between('{', '}', s.substring(i, s.length));
     // offset the difference
-    this.start = i + capture.start + 1;
+    this.start = i + capture.start;
     this.end = capture.end + i;
   } else {
     this.start = i;
