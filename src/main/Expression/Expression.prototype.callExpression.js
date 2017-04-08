@@ -70,7 +70,7 @@
     var b = between('(', ')', s.substring(i, n));
 
     var array = b && parseArray({
-      start : i + b.start + 1,
+      start : i + b.start,
       end : i + b.end,
       string : s,
       delimiter : ','
@@ -120,6 +120,8 @@
   }
 
   Expression.prototype.callExpression = function () {
+    var i = this.start;
+
     var props = {
       type : 'callExpression',
       callee : false,
@@ -128,11 +130,10 @@
       property : false,
       optional : false,
       required : false,
-      start : 0,
-      end : 0
+      start : i,
+      end : -1
     };
 
-    var i = this.start;
 
     if (this.string[i] === '$') {
       callExpressionI.call(this, props);
