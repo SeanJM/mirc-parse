@@ -14,7 +14,7 @@
     "grunt-contrib-copy": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-contrib-watch": "latest",
-    "lasso-string": "^5.2.0",
+    "lasso-string": "^5.3.1",
     "lodash": "latest",
     "match-file-utility": "latest"
   }
