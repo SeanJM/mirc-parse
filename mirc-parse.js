@@ -1,7 +1,7 @@
 (function () {
-function between(a, b, string) {
+function between(a, b, string, index) {
   var o = 0;
-  var i = 0;
+  var i = index || 0;
   var n = string.length;
   var start;
   var alen = a.length;
@@ -22,7 +22,7 @@ function between(a, b, string) {
 
     if (o === 0) {
       return {
-        start : start,
+        start : start + 1,
         end : i,
         length : i - start,
         value : string.substring(start + 1, i)
@@ -220,12 +220,12 @@ function Expression(opt) {
 
   if (p.isAssignmentExpression()) {
     return this.assignmentExpression();
-  } else if (p.isLogicalExpression()) {
-
-  } else if (p.isBinaryExpression()) {
-    return this.binaryExpression();
   } else if (p.isCallExpression()) {
     return this.callExpression();
+  } else if (p.isLogicalExpression()) {
+    return this.logicalExpression();
+  } else if (p.isBinaryExpression()) {
+    return this.binaryExpression();
   } else if (p.isIdentifierExpression()) {
     return this.identifierExpression();
   } else if (p.isLiteralExpression()) {
@@ -248,19 +248,7 @@ Expression.prototype.assignmentExpression = function () {
   };
 };
 Expression.prototype.binaryExpression = function () {
-  var parts = parseArray({
-    start : this.start,
-    end : this.end,
-    string : this.string,
-    delimiter : ' '
-  });
-
-  return {
-    type : 'binaryExpression',
-    operator : parts.value[1].slice,
-    left : new Expression(parts.value[0]),
-    right : new Expression(parts.value[2]),
-  };
+  return this.logicalAndBinaryExpression(BINARY_OPERATORS, 'binaryExpression');
 };
 (function () {
   function callExpression(props) {
@@ -334,7 +322,7 @@ Expression.prototype.binaryExpression = function () {
     var b = between('(', ')', s.substring(i, n));
 
     var array = b && parseArray({
-      start : i + b.start + 1,
+      start : i + b.start,
       end : i + b.end,
       string : s,
       delimiter : ','
@@ -384,6 +372,8 @@ Expression.prototype.binaryExpression = function () {
   }
 
   Expression.prototype.callExpression = function () {
+    var i = this.start;
+
     var props = {
       type : 'callExpression',
       callee : false,
@@ -392,11 +382,10 @@ Expression.prototype.binaryExpression = function () {
       property : false,
       optional : false,
       required : false,
-      start : 0,
-      end : 0
+      start : i,
+      end : -1
     };
 
-    var i = this.start;
 
     if (this.string[i] === '$') {
       callExpressionI.call(this, props);
@@ -439,14 +428,27 @@ Expression.prototype.literalExpression = function () {
 
   var value;
   var isNumber;
+  var capture = i < n;
 
-  while (i < n && !/^\s(%|\$)/.test(string.substring(i, i + 3))) {
+  while (capture) {
+    if (CONTROL_CODE[string[i]]) {
+      while (i < n && !/\s/.test(string[i])) i += 1;
+    }
+
+    if (/^\s(%|\$|\|)/.test(string.substring(i, i + 3))) {
+      capture = false;
+    } else {
+      capture = i < n;
+    }
+
     i += 1;
   }
 
-  value = string
-    .substring(this.start, i)
-    .replace(/\r\n|\n/g, '');
+  i -= 1;
+
+  while (/\s/.test(string[i - 1])) i -= 1;
+
+  value = string.substring(this.start, i);
 
   isNumber = /^[0-9]+(\.[0-9]+|)$/.test(value);
 
@@ -458,8 +460,67 @@ Expression.prototype.literalExpression = function () {
     end : i
   };
 };
-Expression.prototype.logicalExpression = function () {
+(function () {
+  function getExpression(leftOrRight) {
+    var b;
 
+    if (leftOrRight.string[leftOrRight.start] === '(') {
+      b = between('(', ')', leftOrRight.string, leftOrRight.start);
+      leftOrRight.start = b.start;
+      leftOrRight.end = b.end;
+    }
+
+    return new Expression(leftOrRight);
+  }
+
+  Expression.prototype.logicalAndBinaryExpression = function (OPERATORS, type) {
+    var parts = parseArray({
+      start : this.start,
+      end : this.end,
+      string : this.string,
+      delimiter : ' '
+    });
+
+    var operatorIndex = -1;
+
+    var left = {
+      start : parts.start,
+      end : -1,
+      string : this.string
+    };
+
+    var right = {
+      start : -1,
+      end : this.end,
+      string : this.string
+    };
+
+    var operator = false;
+
+    for (var i = 0, n = parts.value.length; i < n; i++) {
+      if (operatorIndex < 0 && OPERATORS.indexOf(parts.value[i].slice) > -1) {
+        operatorIndex = i;
+        operator = parts.value[i].slice;
+      } else if (operatorIndex < 0) {
+        left.end = parts.value[i].end;
+      } else {
+        right.start = parts.value[i].start;
+        i = n;
+      }
+    }
+
+    return {
+      type : type,
+      operator : operator,
+      left : getExpression(left),
+      right : getExpression(right),
+      start : left.start,
+      end : right.end
+    };
+  };
+}());
+Expression.prototype.logicalExpression = function () {
+  return this.logicalAndBinaryExpression(LOGICAL_OPERATORS, 'logicalExpression');
 };
 Expression.prototype.switches = function () {
   var value = [];
@@ -529,9 +590,6 @@ Expression.prototype.switches = function () {
     end : i,
     value : value
   };
-};
-Expression.prototype.unaryExpression = function () {
-
 };
 function ParseMirc(propsOrString) {
   this.body = [];
@@ -616,9 +674,13 @@ Predicate.prototype.isBinaryExpression = function () {
     delimiter : ' '
   });
 
+  var operator = parts.value.filter(function (a) {
+    return BINARY_OPERATORS.indexOf(a.slice) > -1;
+  });
+
   return (
     parts.value.length > 2
-    && BINARY_OPERATORS.includes(parts.value[1].slice)
+    && operator.length > 0
   );
 };
 Predicate.prototype.isCallExpression = function () {
@@ -638,14 +700,9 @@ Predicate.prototype.isIdentifierExpression = function () {
   return EXP_IDENTIFIER.test(slice);
 };
 
-/*
-  - (A) && (B)
-  - (A) || (B)
-  - (A) || (B)
-*/
 Predicate.prototype.isLiteralExpression = function () {
   var slice = this.string.substring(this.start, this.end);
-  return !/^(%|\$)/.test(slice);
+  return !/^(%|\$|\|)/.test(slice);
 };
 /*
   - (A) && (B)
@@ -660,13 +717,31 @@ Predicate.prototype.isLogicalExpression = function () {
     delimiter : ' '
   });
 
+  var operator = parts.value.filter(function (a) {
+    return LOGICAL_OPERATORS.indexOf(a.slice) > -1;
+  });
+
   return (
     parts.value.length > 2
-    && LOGICAL_OPERATORS.includes(parts.value[1].slice)
+    && operator.length > 0
   );
+};
+Predicate.prototype.isPipeStatement = function () {
+  var slice = this.string.substring(this.start, this.end);
+
+  var index = Math.min.apply(null, [
+    slice.indexOf('\r\n'),
+    slice.indexOf('\n'),
+    slice.length
+  ].filter(function (a) {
+    return a > -1;
+  }));
+
+  return /\s\|\s/.test(slice.substring(0, index));
 };
 function Statement(opt) {
   let slice = opt.string.substring(opt.start, opt.end).trim();
+  let p = new Predicate(opt);
   Object.assign(this, opt);
 
   if (/^(\/|)var\b/.test(slice)) {
@@ -681,6 +756,8 @@ function Statement(opt) {
     return this.haltStatement();
   } else if (/^if\b/.test(slice)) {
     return this.ifStatement();
+  } else if (p.isPipeStatement()) {
+    return this.pipe();
   } else if (slice[0] === '{') {
     return this.block();
   } else if (/^(\/|)[a-zA-Z0-9\-\_]+/.test(slice)) {
@@ -716,7 +793,7 @@ Statement.prototype.block = function () {
   if (s[i] === '{') {
     capture = between('{', '}', s.substring(i, s.length));
     // offset the difference
-    this.start = i + capture.start + 1;
+    this.start = i + capture.start;
     this.end = capture.end + i;
   } else {
     this.start = i;
@@ -816,7 +893,7 @@ Statement.prototype.haltStatement = function () {
   function parseTestParens() {
     var b = between('(', ')', this.string.substring(this.start, this.end));
     return new Expression({
-      start : this.start + b.start + 1,
+      start : this.start + b.start,
       end : this.start + b.end,
       string : this.string
     });
@@ -840,8 +917,13 @@ Statement.prototype.haltStatement = function () {
 
     i += 2;
     if (/^(\s+|)\(/.test(s.substring(i, n))) {
-      props.test = parseTestParens.call(this);
-      i = props.test.end + 1;
+      props.test = parseTestParens.call({
+        start : i,
+        end : n,
+        string : s
+      });
+
+      i = props.test.end + 2;
     } else {
       while (i < n && /\s/.test(s[i])) i += 1;
       props.test = new Expression({
@@ -865,6 +947,40 @@ Statement.prototype.haltStatement = function () {
     return props;
   };
 }());
+Statement.prototype.pipe = function () {
+  var i = this.start;
+  var string = this.string;
+
+  var n = Math.min.apply(null, [
+    string.indexOf('\r\n', i),
+    string.indexOf('\n', i),
+    this.end
+  ].filter(function (a) {
+    return a > -1;
+  }));
+
+  var props = {
+    type : 'pipeStatement',
+    start : i,
+    end : 0,
+    body : undefined,
+  };
+
+  var members = parseArray({
+    start : i,
+    end : n,
+    string : string,
+    delimiter : '\\|'
+  });
+
+  props.body = members.value.map(function (member) {
+    return new Statement(member);
+  });
+
+  props.end = members.end;
+
+  return props;
+};
 Statement.prototype.returnStatement = function () {
   return {
     type : 'returnStatement',
